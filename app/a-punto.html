@@ -1,0 +1,638 @@
+<title>A Punto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: app de móvil en una columna (máx. 480px), cabecera fija, barra de pestañas abajo. La bici es la protagonista. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --surface-2:#e4e9ef; --line:#d2dae3;
+  --fg:#0f1a24; --muted:#5a6b7b; --accent:#2457d6; --accent-ink:#ffffff;
+  --ok:#1b9460; --warn:#c97c06; --bad:#d23f37;
+  --shadow:0 1px 2px rgba(15,26,36,.06),0 6px 20px rgba(15,26,36,.06);
+  --display:"Saira Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1117; --surface:#131b23; --surface-2:#1b2630; --line:#25313d;
+  --fg:#e7edf3; --muted:#8b9bab; --accent:#6e95ff; --accent-ink:#0b1117;
+  --ok:#3cc98a; --warn:#f0a63a; --bad:#ff6b62;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1117; --surface:#131b23; --surface-2:#1b2630; --line:#25313d;
+  --fg:#e7edf3; --muted:#8b9bab; --accent:#6e95ff; --accent-ink:#0b1117;
+  --ok:#3cc98a; --warn:#f0a63a; --bad:#ff6b62;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.app{max-width:480px;margin:0 auto;padding-inline:16px;padding-block:0 calc(88px + env(safe-area-inset-bottom,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px 10px}
+.brand{font-family:var(--display);font-weight:800;font-size:28px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand span{color:var(--accent)}
+.bike-name{font-size:13px;color:var(--muted)}
+.btn{border:0;border-radius:999px;padding:10px 16px;font-weight:600;background:var(--surface-2)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:7px 12px;font-size:13px}
+.example{font-size:12px;color:var(--muted);background:var(--surface-2);border-radius:10px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.example button{background:none;border:0;color:var(--accent);font-weight:600;font-size:12px;padding:0}
+
+h2{font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;margin:0;text-wrap:balance}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+section.view{display:flex;flex-direction:column;gap:16px;padding-block:8px}
+.panel{background:var(--surface);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px}
+.between{justify-content:space-between}
+
+/* Garaje */
+.hero{position:relative;background:var(--surface);border-radius:24px;box-shadow:var(--shadow);padding:16px 12px 8px;overflow:hidden}
+.hero-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-inline:4px}
+.score{display:flex;align-items:center;gap:12px}
+.ring{width:84px;height:84px;flex:none}
+.ring text{font-family:var(--display);font-weight:800;fill:var(--fg)}
+.score-label{font-family:var(--display);font-weight:700;font-size:20px;text-transform:uppercase;line-height:1.05}
+.score-sub{font-size:13px;color:var(--muted)}
+.km-big{text-align:right}
+.km-big .v{font-family:var(--display);font-weight:800;font-size:30px;line-height:1}
+.km-big .l{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+svg.bike{width:100%;height:auto;display:block;margin-top:4px}
+.frame{stroke:var(--fg);stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.thin{stroke:var(--fg);stroke-width:3;fill:none;stroke-linecap:round}
+.spoke{stroke:var(--line);stroke-width:1.2}
+.hub{fill:var(--fg)}
+.hot{cursor:pointer}
+.hot .halo{opacity:.22;transform-box:fill-box;transform-origin:center;animation:pulse 2.4s ease-in-out infinite}
+.hot .dot{stroke:var(--surface);stroke-width:3}
+.hot:focus-visible{outline:none}
+.hot:focus-visible .dot{stroke:var(--accent);stroke-width:4}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5)}}
+@media (prefers-reduced-motion:reduce){.hot .halo{animation:none}}
+.hint{font-size:12px;color:var(--muted);text-align:center;padding-bottom:6px}
+
+.alert{display:flex;gap:12px;align-items:center;border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--bad) 12%,var(--surface));}
+.alert.warn{background:color-mix(in srgb,var(--warn) 14%,var(--surface))}
+.alert b{display:block}
+.alert .sev{width:10px;align-self:stretch;border-radius:6px;background:var(--bad);flex:none}
+.alert.warn .sev{background:var(--warn)}
+.alert .txt{flex:1;min-width:0;font-size:14px}
+
+.parts{display:flex;flex-direction:column}
+.part{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 2px;border:0;background:none;text-align:left;border-bottom:1px solid var(--line)}
+.part:last-child{border-bottom:0}
+.part .n{font-weight:600}
+.part .r{font-size:13px;color:var(--muted)}
+.part .pct{font-family:var(--display);font-weight:700;font-size:20px;grid-row:span 2}
+.bar{grid-column:1/-1;height:6px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px}
+
+/* Check */
+.streak{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.streak .v{font-family:var(--display);font-weight:800;font-size:44px;line-height:1}
+.heat{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:4px;margin-top:12px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--surface-2);max-width:100%}
+.heat i.on{background:var(--ok)}
+.heat i.today{outline:2px solid var(--accent);outline-offset:1px}
+.checks{display:flex;flex-direction:column;gap:10px}
+.chk{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:var(--surface);border-radius:16px;padding:14px;text-align:left;width:100%}
+.chk .box{width:28px;height:28px;border-radius:9px;border:2px solid var(--line);flex:none;display:grid;place-items:center;transition:background .2s,border-color .2s}
+.chk.done{border-color:color-mix(in srgb,var(--ok) 50%,var(--line))}
+.chk.done .box{background:var(--ok);border-color:var(--ok)}
+.chk .box svg{opacity:0}
+.chk.done .box svg{opacity:1}
+.chk .t{font-weight:600}
+.chk .d{font-size:13px;color:var(--muted)}
+.chk>span:last-child{min-width:0}
+.done-banner{text-align:center;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--ok) 14%,var(--surface));font-weight:600}
+
+/* Presión */
+.gauges{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gauge{text-align:center}
+.gauge svg{width:100%;max-width:180px;height:auto}
+.gauge .v{font-family:var(--display);font-weight:800;font-size:34px;line-height:1}
+.gauge .u{font-size:12px;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-size:13px;font-weight:600;display:flex;justify-content:space-between}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.note{font-size:12px;color:var(--muted)}
+
+/* Gastos */
+.money{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.money .v{font-family:var(--display);font-weight:800;font-size:30px;line-height:1.05}
+.money .l{font-size:12px;color:var(--muted)}
+.cat{display:grid;grid-template-columns:110px 1fr auto;gap:10px;align-items:center;font-size:14px;padding-block:6px}
+.cat .track{height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.cat .track i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.list{display:flex;flex-direction:column}
+.li{display:flex;justify-content:space-between;gap:12px;padding-block:10px;border-bottom:1px solid var(--line);font-size:14px}
+.li:last-child{border-bottom:0}
+.li .m{color:var(--muted);font-size:12px}
+
+/* Diagnóstico */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;font-size:14px;font-weight:600;text-align:left}
+.chips button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.cause{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:16px;border:1px solid var(--line)}
+.cause.match{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 8%,var(--surface))}
+.cause .h{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.cause .h b{min-width:0}
+.pill{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px;white-space:nowrap}
+.pill.easy{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.pill.mid{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.pill.shop{background:color-mix(in srgb,var(--bad) 16%,transparent);color:var(--bad)}
+.cause p{margin:0;font-size:14px;color:var(--muted)}
+.cause .flag{font-size:13px;font-weight:600;color:var(--bad)}
+
+/* Tabs */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}
+nav.tabs .in{max-width:480px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr)}
+nav.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;font-size:11px;font-weight:600;color:var(--muted)}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-selected="true"]{color:var(--accent)}
+
+/* Hoja inferior */
+.scrim{position:fixed;inset:0;background:rgba(5,10,15,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;max-height:88%;overflow:auto;animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.grab{width:40px;height:5px;border-radius:5px;background:var(--line);margin:0 auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:var(--surface-2);border-radius:14px;padding:10px}
+.stat .v{font-family:var(--display);font-weight:700;font-size:22px;line-height:1.1}
+.stat .l{font-size:11px;color:var(--muted)}
+.inp{display:flex;gap:8px;align-items:center}
+.inp input,.inp select{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:11px 12px;font:inherit;color:var(--fg)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions .btn{flex:1}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:30;max-width:calc(100% - 32px)}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <div class="brand">A <span>Punto</span></div>
+      <div class="bike-name" id="bikeName"></div>
+    </div>
+    <button class="btn primary small" id="addRide" type="button">+ Salida</button>
+  </header>
+
+  <div class="example" id="exampleNote"><span>Datos de ejemplo. Cámbialos con tu bici.</span><button type="button" id="resetBtn">Reiniciar</button></div>
+
+  <!-- GARAJE -->
+  <section class="view" id="v-garage" aria-label="Garaje">
+    <div class="hero">
+      <div class="hero-head">
+        <div class="score">
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="var(--surface-2)" stroke-width="10"/>
+            <circle id="ringArc" cx="50" cy="50" r="42" fill="none" stroke="var(--ok)" stroke-width="10" stroke-linecap="round" transform="rotate(-90 50 50)" stroke-dasharray="263.9" stroke-dashoffset="263.9" style="transition:stroke-dashoffset .8s ease"/>
+            <text id="ringTxt" x="50" y="60" text-anchor="middle" font-size="30">0</text>
+          </svg>
+          <div>
+            <div class="eyebrow">Estado</div>
+            <div class="score-label" id="scoreLabel"></div>
+            <div class="score-sub" id="scoreSub"></div>
+          </div>
+        </div>
+        <div class="km-big"><div class="v num" id="kmTotal"></div><div class="l">km totales</div></div>
+      </div>
+      <svg class="bike" viewBox="0 0 600 362" role="img" aria-label="Tu bici con el estado de cada pieza">
+        <g id="wheels"></g>
+        <!-- cuadro -->
+        <path class="frame" d="M140 250 L285 255 L262 118 Z"/>
+        <path class="frame" d="M285 255 L430 140 L418 108 L262 118"/>
+        <path class="frame" d="M430 140 L462 250"/>
+        <!-- tija, sillín, potencia, manillar -->
+        <path class="thin" d="M262 118 L254 86" style="stroke-width:5"/>
+        <path class="frame" d="M222 82 Q248 76 284 84" style="stroke-width:8"/>
+        <path class="thin" d="M418 108 L442 98" style="stroke-width:5"/>
+        <path class="thin" d="M442 98 Q476 96 474 118 Q472 138 452 140" style="stroke-width:5"/>
+        <!-- transmisión -->
+        <path id="chainPath" d="M285 223 L140 233 M285 287 L140 267" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <circle id="ringC" cx="285" cy="255" r="32" fill="none" stroke-width="5"/>
+        <circle id="cassC" cx="140" cy="250" r="17" fill="none" stroke-width="5"/>
+        <path class="thin" d="M285 255 L312 300" style="stroke-width:7"/>
+        <rect x="300" y="297" width="26" height="7" rx="3" class="hub"/>
+        <!-- disco delantero -->
+        <circle id="rotorC" cx="462" cy="250" r="22" fill="none" stroke-width="4" stroke-dasharray="6 3"/>
+        <circle class="hub" cx="140" cy="250" r="5"/><circle class="hub" cx="462" cy="250" r="5"/>
+        <g id="hots"></g>
+      </svg>
+      <div class="hint">Toca un punto para ver la pieza</div>
+    </div>
+
+    <div id="alerts" class="checks"></div>
+
+    <div class="panel">
+      <div class="row between"><h2>Piezas</h2><span class="eyebrow" id="partsCount"></span></div>
+      <div class="parts" id="partsList"></div>
+    </div>
+  </section>
+
+  <!-- CHECK DIARIO -->
+  <section class="view" id="v-check" aria-label="Check diario" hidden>
+    <div class="panel">
+      <div class="streak">
+        <div>
+          <div class="eyebrow">Racha de checks</div>
+          <div class="v num" id="streakV">0</div>
+          <div class="score-sub">días seguidos con la bici a punto</div>
+        </div>
+        <svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-5.5 1-8.5z" fill="var(--warn)"/></svg>
+      </div>
+      <div class="heat" id="heat" aria-label="Últimas 12 semanas"></div>
+    </div>
+    <div class="row between"><h2>Check de 30 segundos</h2><span class="eyebrow num" id="checkCount"></span></div>
+    <div class="checks" id="checkList"></div>
+    <div id="checkDone"></div>
+  </section>
+
+  <!-- PRESIÓN -->
+  <section class="view" id="v-pressure" aria-label="Presión" hidden>
+    <div class="panel">
+      <div class="eyebrow">Presión recomendada</div>
+      <div class="gauges" id="gauges"></div>
+    </div>
+    <div class="panel" style="display:flex;flex-direction:column;gap:18px">
+      <div class="field">
+        <label for="pWeight"><span>Peso ciclista + bici</span><span class="num" id="pWeightV"></span></label>
+        <input type="range" id="pWeight" min="50" max="130" step="1">
+      </div>
+      <div class="field"><label>Ancho de cubierta</label><div class="seg" id="pWidth"></div></div>
+      <div class="field"><label>Montaje</label><div class="seg" id="pSetup"></div></div>
+      <div class="field"><label>Terreno de hoy</label><div class="seg" id="pTerrain"></div></div>
+      <p class="note">Valores orientativos. No superes la presión máxima que marcan tu llanta y tu cubierta.</p>
+    </div>
+  </section>
+
+  <!-- GASTOS -->
+  <section class="view" id="v-costs" aria-label="Gastos" hidden>
+    <div class="panel money">
+      <div><div class="eyebrow">Este año</div><div class="v num" id="cTotal"></div><div class="l">en tu bici</div></div>
+      <div><div class="eyebrow">Por km</div><div class="v num" id="cPerKm"></div><div class="l">coste de mantenimiento</div></div>
+    </div>
+    <div class="panel" id="forecast"></div>
+    <div class="panel">
+      <h2 style="margin-bottom:8px">Por categoría</h2>
+      <div id="cats"></div>
+    </div>
+    <div class="panel">
+      <h2 style="margin-bottom:4px">Historial</h2>
+      <div class="list" id="expList"></div>
+    </div>
+  </section>
+
+  <!-- DIAGNÓSTICO -->
+  <section class="view" id="v-diag" aria-label="Diagnóstico" hidden>
+    <div>
+      <div class="eyebrow">¿Qué le pasa a tu bici?</div>
+      <h2>Elige el síntoma</h2>
+    </div>
+    <div class="chips" id="symptoms"></div>
+    <div class="checks" id="causes"></div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="in" role="tablist" id="tabs"></div>
+</nav>
+
+<div id="sheetRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(function(){
+"use strict";
+const KEY="apunto-v1";
+const DAY=864e5;
+const today=new Date(); today.setHours(0,0,0,0);
+const iso=d=>{const x=new Date(d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0")};
+const daysAgo=n=>iso(today.getTime()-n*DAY);
+const fmt=n=>Math.round(n).toLocaleString("es-ES",{useGrouping:"always"});
+const eur=n=>n.toLocaleString("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:n<10?2:0});
+
+/* Piezas: tipo km (vida en km) o días (vida en días). x,y = punto sobre la bici. wear = sensible a lluvia y barro. */
+function sample(){
+  const checks={};
+  for(let i=1;i<=84;i++){ if(i<=9 || (i*7)%5!==0 && i%11!==0) checks[daysAgo(i)]=true; }
+  return {
+    bike:{name:"La Negra",type:"Carretera",km:5200},
+    parts:[
+      {id:"cadena",name:"Cadena",kind:"km",life:3000,used:2380,cost:35,cat:"Transmisión",x:212,y:228,wear:true},
+      {id:"cassette",name:"Cassette",kind:"km",life:12000,used:5200,cost:90,cat:"Transmisión",x:140,y:250,wear:true},
+      {id:"platos",name:"Platos",kind:"km",life:20000,used:5200,cost:120,cat:"Transmisión",x:285,y:255,wear:true},
+      {id:"cubtras",name:"Cubierta trasera",kind:"km",life:4000,used:3000,cost:55,cat:"Ruedas",x:60,y:200},
+      {id:"cubdel",name:"Cubierta delantera",kind:"km",life:6000,used:3420,cost:55,cat:"Ruedas",x:540,y:200},
+      {id:"pastillas",name:"Pastillas de freno",kind:"km",life:2500,used:1450,cost:25,cat:"Frenos",x:462,y:250,wear:true},
+      {id:"liquido",name:"Líquido tubeless",kind:"days",life:90,since:daysAgo(74),cost:15,cat:"Ruedas",x:100,y:330-160},
+      {id:"cables",name:"Cables y fundas",kind:"km",life:8000,used:5200,cost:30,cat:"Transmisión",x:357,y:198},
+      {id:"direccion",name:"Dirección",kind:"km",life:15000,used:5200,cost:40,cat:"Rodamientos",x:424,y:124},
+      {id:"cinta",name:"Cinta de manillar",kind:"days",life:365,since:daysAgo(220),cost:20,cat:"Contacto",x:474,y:112}
+    ],
+    expenses:[
+      {d:daysAgo(220),item:"Cubierta delantera",cat:"Ruedas",eur:55},
+      {d:daysAgo(190),item:"Revisión en taller",cat:"Taller",eur:60},
+      {d:daysAgo(150),item:"Pastillas de freno",cat:"Frenos",eur:25},
+      {d:daysAgo(120),item:"Cadena",cat:"Transmisión",eur:35},
+      {d:daysAgo(74),item:"Líquido tubeless",cat:"Ruedas",eur:15},
+      {d:daysAgo(40),item:"Lubricante de cera",cat:"Transmisión",eur:18},
+      {d:daysAgo(12),item:"Cámara de repuesto y CO₂",cat:"Ruedas",eur:14}
+    ],
+    yearKm:3420,
+    checks,
+    todayChecks:{date:iso(today),done:{}},
+    pressure:{w:80,width:28,setup:"tubeless",terrain:"bueno"},
+    example:true
+  };
+}
+let S;
+function load(){try{const r=localStorage.getItem(KEY);if(r){S=JSON.parse(r);return}}catch(e){} S=sample();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+if(S.todayChecks.date!==iso(today)) S.todayChecks={date:iso(today),done:{}};
+
+/* Salud de una pieza: 1 = nueva, 0 = hay que cambiarla */
+function health(p){
+  if(p.kind==="days"){const d=(today-new Date(p.since+"T00:00:00"))/DAY;return Math.max(0,Math.min(1,1-d/p.life))}
+  return Math.max(0,Math.min(1,1-p.used/p.life));
+}
+function left(p){
+  if(p.kind==="days"){const d=Math.round(health(p)*p.life);return d<=0?"Toca cambiarlo ya":"quedan ~"+d+" días"}
+  const k=p.life-p.used;return k<=0?"Toca cambiarla ya":"quedan ~"+fmt(k)+" km";
+}
+const col=h=>h<.25?"var(--bad)":h<.5?"var(--warn)":"var(--ok)";
+const P=id=>S.parts.find(p=>p.id===id);
+
+/* ---------- Garaje ---------- */
+function score(){
+  const w={cadena:2,pastillas:2,cubtras:1.5,cubdel:1.5,liquido:1};
+  let s=0,t=0;S.parts.forEach(p=>{const k=w[p.id]||1;s+=health(p)*k;t+=k});
+  return Math.round(s/t*100);
+}
+function drawWheels(){
+  const g=document.getElementById("wheels");
+  let h="";
+  [[140,"cubtras"],[462,"cubdel"]].forEach(([cx,id])=>{
+    for(let a=0;a<360;a+=20){const r=a*Math.PI/180;h+=`<line class="spoke" x1="${cx}" y1="250" x2="${cx+86*Math.cos(r)}" y2="${250+86*Math.sin(r)}"/>`}
+    h+=`<circle cx="${cx}" cy="250" r="86" fill="none" stroke="var(--fg)" stroke-width="5"/>`;
+    h+=`<circle cx="${cx}" cy="250" r="94" fill="none" stroke="${col(health(P(id)))}" stroke-width="11"/>`;
+  });
+  g.innerHTML=h;
+  document.getElementById("chainPath").setAttribute("stroke",col(health(P("cadena"))));
+  document.getElementById("ringC").setAttribute("stroke",col(health(P("platos"))));
+  document.getElementById("cassC").setAttribute("stroke",col(health(P("cassette"))));
+  document.getElementById("rotorC").setAttribute("stroke",col(health(P("pastillas"))));
+}
+function renderGarage(){
+  document.getElementById("bikeName").textContent=S.bike.name+" · "+S.bike.type;
+  document.getElementById("kmTotal").textContent=fmt(S.bike.km);
+  const sc=score();
+  const arc=document.getElementById("ringArc");
+  arc.style.strokeDashoffset=String(263.9*(1-sc/100));
+  arc.setAttribute("stroke",sc>=75?"var(--ok)":sc>=55?"var(--warn)":"var(--bad)");
+  document.getElementById("ringTxt").textContent=sc;
+  const bad=S.parts.filter(p=>health(p)<.25), warn=S.parts.filter(p=>{const h=health(p);return h>=.25&&h<.5});
+  document.getElementById("scoreLabel").textContent=bad.length?"Casi a punto":sc>=75?"A punto":"Necesita mimos";
+  document.getElementById("scoreSub").textContent=bad.length?bad.length+(bad.length>1?" piezas piden cambio":" pieza pide cambio"):"Todo en orden";
+  drawWheels();
+  document.getElementById("hots").innerHTML=S.parts.map(p=>{const c=col(health(p));return `<g class="hot" data-id="${p.id}" tabindex="0" role="button" aria-label="${p.name}, ${Math.round(health(p)*100)}%"><circle class="halo" cx="${p.x}" cy="${p.y}" r="13" fill="${c}"/><circle class="dot" cx="${p.x}" cy="${p.y}" r="9" fill="${c}"/></g>`}).join("");
+  const al=[...bad.map(p=>["",p]),...warn.slice(0,Math.max(0,3-bad.length)).map(p=>["warn",p])];
+  document.getElementById("alerts").innerHTML=al.map(([c,p])=>`<button type="button" class="alert ${c}" data-id="${p.id}" style="border:0;text-align:left;width:100%"><span class="sev"></span><span class="txt"><b>${p.name}: ${Math.round(health(p)*100)}%</b>${left(p)} · cambio aprox. ${eur(p.cost)}</span><span aria-hidden="true">›</span></button>`).join("");
+  const sorted=[...S.parts].sort((a,b)=>health(a)-health(b));
+  document.getElementById("partsCount").textContent=S.parts.length+" piezas";
+  document.getElementById("partsList").innerHTML=sorted.map(p=>{const h=health(p);return `<button type="button" class="part" data-id="${p.id}"><span class="n">${p.name}</span><span class="pct num" style="color:${col(h)}">${Math.round(h*100)}%</span><span class="r">${left(p)}</span><span class="bar"><i style="width:${Math.max(3,h*100)}%;background:${col(h)}"></i></span></button>`}).join("");
+}
+
+/* ---------- Hoja de detalle de pieza ---------- */
+function openPart(id){
+  const p=P(id),h=health(p);
+  const usedTxt=p.kind==="days"?Math.round((today-new Date(p.since+"T00:00:00"))/DAY)+" días":fmt(p.used)+" km";
+  const lifeTxt=p.kind==="days"?p.life+" días":fmt(p.life)+" km";
+  sheet(`<div class="grab"></div>
+    <div class="row between"><div><div class="eyebrow">${p.cat}</div><h2>${p.name}</h2></div><div class="num" style="font-family:var(--display);font-weight:800;font-size:40px;color:${col(h)}">${Math.round(h*100)}%</div></div>
+    <div class="bar" style="height:10px"><i style="width:${Math.max(3,h*100)}%;background:${col(h)}"></i></div>
+    <div class="stats">
+      <div class="stat"><div class="v num">${usedTxt}</div><div class="l">de uso</div></div>
+      <div class="stat"><div class="v num">${lifeTxt}</div><div class="l">vida estimada</div></div>
+      <div class="stat"><div class="v num">${eur(p.cost)}</div><div class="l">recambio</div></div>
+    </div>
+    <div class="field"><label for="lifeIn">Vida útil que esperas (${p.kind==="days"?"días":"km"})</label>
+      <div class="inp"><input id="lifeIn" type="number" inputmode="numeric" value="${p.life}" min="1"></div></div>
+    <div class="field"><label for="costIn">Lo que te ha costado el recambio (€)</label>
+      <div class="inp"><input id="costIn" type="number" inputmode="decimal" value="${p.cost}" min="0" step="0.5"></div></div>
+    <div class="actions"><button class="btn" type="button" data-act="close">Cerrar</button><button class="btn primary" type="button" data-act="replace">La he cambiado hoy</button></div>`,
+  act=>{
+    const life=parseFloat(document.getElementById("lifeIn").value);
+    if(life>0) p.life=life;
+    if(act==="replace"){
+      const c=parseFloat(document.getElementById("costIn").value)||0;
+      p.cost=c||p.cost;
+      if(p.kind==="days") p.since=iso(today); else p.used=0;
+      if(c>0) S.expenses.push({d:iso(today),item:p.name,cat:p.cat,eur:c});
+      toast(p.name+" al 100 %");
+    }
+    S.example=false; save(); renderAll();
+  });
+}
+
+/* ---------- Salida ---------- */
+function openRide(){
+  sheet(`<div class="grab"></div><div><div class="eyebrow">Nueva salida</div><h2>¿Cuánto has rodado?</h2></div>
+    <div class="field"><label for="rideKm">Kilómetros</label><div class="inp"><input id="rideKm" type="number" inputmode="decimal" value="60" min="1"></div></div>
+    <div class="field"><label>Condiciones</label><div class="seg" id="rideCond">
+      <button type="button" data-v="1" aria-pressed="true">Seco</button><button type="button" data-v="1.6" aria-pressed="false">Mojado</button><button type="button" data-v="2.2" aria-pressed="false">Barro</button></div>
+      <p class="note">Con lluvia o barro la cadena, el cassette y las pastillas se gastan más rápido.</p></div>
+    <div class="actions"><button class="btn" type="button" data-act="close">Cancelar</button><button class="btn primary" type="button" data-act="save">Guardar salida</button></div>`,
+  act=>{
+    if(act!=="save") return;
+    const km=parseFloat(document.getElementById("rideKm").value)||0;
+    const f=parseFloat(document.querySelector('#rideCond [aria-pressed="true"]').dataset.v);
+    if(km<=0) return;
+    S.bike.km+=km; S.yearKm+=km;
+    S.parts.forEach(p=>{if(p.kind==="km") p.used+=km*(p.wear?f:1)});
+    S.example=false; save(); renderAll(); toast("+"+fmt(km)+" km guardados");
+  });
+  segGroup(document.getElementById("rideCond"));
+}
+
+function segGroup(el,onPick){
+  el.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;el.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));onPick&&onPick(b.dataset.v)});
+}
+function sheet(html,onAct){
+  const root=document.getElementById("sheetRoot");
+  root.innerHTML=`<div class="scrim"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const scrim=root.firstChild, close=()=>{root.innerHTML="";document.removeEventListener("keydown",esc)};
+  const esc=e=>{if(e.key==="Escape")close()};
+  document.addEventListener("keydown",esc);
+  scrim.addEventListener("click",e=>{
+    if(e.target===scrim){close();return}
+    const b=e.target.closest("[data-act]");if(!b)return;
+    if(b.dataset.act!=="close") onAct(b.dataset.act);
+    close();
+  });
+  const f=scrim.querySelector("input,button.primary");f&&f.focus();
+}
+let tt;
+function toast(t){const r=document.getElementById("toastRoot");r.innerHTML=`<div class="toast" role="status">${t}</div>`;clearTimeout(tt);tt=setTimeout(()=>r.innerHTML="",2200)}
+
+/* ---------- Check diario ---------- */
+const CHECKS=[
+  ["presion","Presión de las ruedas","Aprieta la cubierta o usa el manómetro"],
+  ["cadena","Cadena limpia y lubricada","Sin ruido y sin grasa negra acumulada"],
+  ["frenos","Tacto de frenos","La maneta no llega al manillar"],
+  ["cierres","Ejes y cierres apretados","Ruedas firmes, sin holgura"],
+  ["cubiertas","Cubiertas sin cortes","Revisa piedrecitas y cristales"],
+  ["bateria","Baterías cargadas","Luces, cambio electrónico y GPS"]
+];
+const tick=`<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+function allDone(){return CHECKS.every(c=>S.todayChecks.done[c[0]])}
+function streak(){
+  let n=allDone()?1:0;
+  for(let i=1;i<400;i++){if(S.checks[daysAgo(i)])n++;else break}
+  return n;
+}
+function renderCheck(){
+  const done=S.todayChecks.done;
+  if(allDone()) S.checks[iso(today)]=true; else delete S.checks[iso(today)];
+  document.getElementById("streakV").textContent=streak();
+  // Mapa de 12 semanas: columnas = semanas, filas = lunes..domingo
+  const dow=(today.getDay()+6)%7, start=today.getTime()-(77+dow)*DAY;
+  let h="";
+  for(let i=0;i<84;i++){const t=start+i*DAY;if(t>today.getTime()){h+=`<i style="visibility:hidden"></i>`;continue}const k=iso(t);h+=`<i class="${S.checks[k]?"on":""} ${k===iso(today)?"today":""}" title="${k}"></i>`}
+  document.getElementById("heat").innerHTML=h;
+  const n=CHECKS.filter(c=>done[c[0]]).length;
+  document.getElementById("checkCount").textContent=n+"/"+CHECKS.length;
+  document.getElementById("checkList").innerHTML=CHECKS.map(([id,t,d])=>`<button type="button" class="chk ${done[id]?"done":""}" data-chk="${id}" aria-pressed="${!!done[id]}"><span class="box">${tick}</span><span><span class="t">${t}</span><br><span class="d">${d}</span></span></button>`).join("");
+  document.getElementById("checkDone").innerHTML=allDone()?`<div class="done-banner">Bici a punto para hoy. Racha de ${streak()} días.</div>`:"";
+}
+
+/* ---------- Presión ---------- */
+function pressure(){
+  const {w,width,setup,terrain}=S.pressure;
+  const rearLoad=w*0.6;
+  let rear=16.05*rearLoad/Math.pow(width,1.5);
+  rear*= {bueno:1,malo:.95,mojado:.92,tierra:.85}[terrain];
+  if(setup==="camara") rear*=1.04;
+  const front=rear*.93;
+  return {front,rear};
+}
+function gauge(label,bar){
+  const max=8, a=Math.min(1,bar/max), r=70, L=Math.PI*r;
+  return `<div class="gauge"><svg viewBox="0 0 180 110" aria-hidden="true">
+    <path d="M20 94 A70 70 0 0 1 160 94" fill="none" stroke="var(--surface-2)" stroke-width="14" stroke-linecap="round"/>
+    <path d="M20 94 A70 70 0 0 1 160 94" fill="none" stroke="var(--accent)" stroke-width="14" stroke-linecap="round" stroke-dasharray="${L}" stroke-dashoffset="${L*(1-a)}" style="transition:stroke-dashoffset .5s ease"/>
+    <text x="20" y="104" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="var(--mono)">0</text>
+    <text x="160" y="104" font-size="10" fill="var(--muted)" text-anchor="middle" font-family="var(--mono)">8</text>
+  </svg><div class="v num">${bar.toFixed(1).replace(".",",")}</div><div class="u">bar · ${Math.round(bar*14.5038)} psi</div><div class="eyebrow" style="margin-top:4px">${label}</div></div>`;
+}
+function renderPressure(){
+  const p=S.pressure;
+  document.getElementById("pWeight").value=p.w;
+  document.getElementById("pWeightV").textContent=p.w+" kg";
+  const opt=(id,vals,cur)=>{document.getElementById(id).innerHTML=vals.map(([v,t])=>`<button type="button" data-v="${v}" aria-pressed="${String(v)===String(cur)}">${t}</button>`).join("")};
+  opt("pWidth",[25,28,30,32,35,40,45].map(v=>[v,v+" mm"]),p.width);
+  opt("pSetup",[["tubeless","Tubeless"],["camara","Con cámara"]],p.setup);
+  opt("pTerrain",[["bueno","Asfalto bueno"],["malo","Asfalto roto"],["mojado","Mojado"],["tierra","Tierra"]],p.terrain);
+  const r=pressure();
+  document.getElementById("gauges").innerHTML=gauge("Delantera",r.front)+gauge("Trasera",r.rear);
+}
+
+/* ---------- Gastos ---------- */
+function renderCosts(){
+  const y=today.getFullYear();
+  const ex=S.expenses.filter(e=>new Date(e.d).getFullYear()===y);
+  const tot=ex.reduce((s,e)=>s+e.eur,0);
+  document.getElementById("cTotal").textContent=eur(tot);
+  document.getElementById("cPerKm").textContent=S.yearKm>0?(tot/S.yearKm).toLocaleString("es-ES",{style:"currency",currency:"EUR",minimumFractionDigits:3,maximumFractionDigits:3}):"–";
+  const soon=S.parts.filter(p=>health(p)<.35).sort((a,b)=>health(a)-health(b));
+  const fsum=soon.reduce((s,p)=>s+p.cost,0);
+  document.getElementById("forecast").innerHTML=soon.length?`<div class="eyebrow">Prepárate</div><div class="row between" style="margin-block:4px 8px"><h2>Próximos cambios</h2><span class="num" style="font-family:var(--display);font-weight:800;font-size:26px">${eur(fsum)}</span></div><div class="list">${soon.map(p=>`<div class="li"><span>${p.name}<br><span class="m">${left(p)}</span></span><span class="num">${eur(p.cost)}</span></div>`).join("")}</div>`:`<div class="eyebrow">Prepárate</div><h2>Nada a la vista</h2><p class="note">Ninguna pieza está cerca de cambiarse.</p>`;
+  const cats={};ex.forEach(e=>cats[e.cat]=(cats[e.cat]||0)+e.eur);
+  const arr=Object.entries(cats).sort((a,b)=>b[1]-a[1]),mx=arr.length?arr[0][1]:1;
+  document.getElementById("cats").innerHTML=arr.length?arr.map(([c,v])=>`<div class="cat"><span>${c}</span><span class="track"><i style="width:${v/mx*100}%"></i></span><span class="num">${eur(v)}</span></div>`).join(""):`<p class="note">Aún no hay gastos este año.</p>`;
+  document.getElementById("expList").innerHTML=[...S.expenses].sort((a,b)=>b.d.localeCompare(a.d)).map(e=>`<div class="li"><span>${e.item}<br><span class="m">${new Date(e.d+"T00:00:00").toLocaleDateString("es-ES",{day:"numeric",month:"short"})} · ${e.cat}</span></span><span class="num">${eur(e.eur)}</span></div>`).join("");
+}
+
+/* ---------- Diagnóstico ---------- */
+const DIAG={
+  crujido:{t:"Cruje al pedalear de pie",c:[
+    ["Pedales o calas sueltos o secos","Aprieta los pedales y engrasa la rosca. Revisa el desgaste de las calas.","easy"],
+    ["Ejes pasantes o cierres flojos","Desmonta, limpia, engrasa un poco y aprieta al par indicado.","easy"],
+    ["Tija o sillín","Limpia la tija, pon pasta de montaje en carbono y aprieta los tornillos del sillín.","easy"],
+    ["Eje de pedalier","Si sigue tras lo anterior, el pedalier necesita limpieza o cambio.","shop"]]},
+  cadena:{t:"Salta la cadena o el cambio no entra",c:[
+    ["Cadena estirada","Mide con un medidor de cadena. A partir de 0,5 % toca cambiarla.","mid","cadena"],
+    ["Tensión del cable","Gira el tensor de la maneta media vuelta y prueba piñón a piñón.","easy","cables"],
+    ["Patilla de cambio doblada","Mírala desde atrás: el cambio debe quedar recto. Se endereza con herramienta.","shop"],
+    ["Cassette gastado","Si la cadena es nueva y salta, los piñones más usados están gastados.","mid","cassette"]]},
+  chirrido:{t:"Los frenos chirrían",c:[
+    ["Disco sucio","Limpia el disco con alcohol isopropílico y un paño limpio.","easy"],
+    ["Pastillas contaminadas o gastadas","Si tienen menos de 1,5 mm o se mancharon de aceite, cámbialas.","mid","pastillas"],
+    ["Pastillas sin asentar","Si son nuevas, haz 10 frenadas fuertes de 25 a 5 km/h.","easy"]]},
+  esponja:{t:"La maneta de freno va esponjosa",c:[
+    ["Aire en el circuito","Necesita un sangrado del freno hidráulico.","shop"],
+    ["Pastillas muy gastadas","El pistón sale demasiado. Revisa el grosor.","mid","pastillas"]]},
+  pinchazo:{t:"Pincho mucho",c:[
+    ["Presión baja","Revisa la presión recomendada en la pestaña Presión.","easy"],
+    ["Cubierta gastada","Si se ve la carcasa o tiene la banda plana, cámbiala.","easy","cubtras"],
+    ["Líquido tubeless seco","El líquido dura unos 2–4 meses. Añade 30–40 ml.","easy","liquido"]]},
+  roce:{t:"Algo roza al rodar",c:[
+    ["Rueda mal asentada","Afloja el eje, apoya la bici en el suelo y vuelve a apretar.","easy"],
+    ["Disco descentrado","Afloja la pinza, aprieta la maneta y vuelve a fijarla.","easy"],
+    ["Rueda descentrada o buje","Gira la rueda y mira la llanta. Si se mueve de lado, al taller.","shop"]]}
+};
+let symptom="cadena";
+function renderDiag(){
+  document.getElementById("symptoms").innerHTML=Object.entries(DIAG).map(([k,v])=>`<button type="button" data-sym="${k}" aria-pressed="${k===symptom}">${v.t}</button>`).join("");
+  const lv={easy:"Lo haces tú",mid:"Con paciencia",shop:"Al taller"};
+  const cs=DIAG[symptom].c.map(c=>{const p=c[3]&&P(c[3]);const h=p?health(p):1;return {c,p,h,m:p&&h<.35}}).sort((a,b)=>b.m-a.m);
+  document.getElementById("causes").innerHTML=cs.map(({c,p,h,m})=>`<div class="cause ${m?"match":""}"><div class="h"><b>${c[0]}</b><span class="pill ${c[2]}">${lv[c[2]]}</span></div><p>${c[1]}</p>${m?`<div class="flag">Causa probable: tu ${p.name.toLowerCase()} está al ${Math.round(h*100)} %</div>`:""}</div>`).join("");
+}
+
+/* ---------- Navegación ---------- */
+const TABS=[
+  ["garage","Garaje",'<path d="M5 17a3 3 0 1 0 0 .01M19 17a3 3 0 1 0 0 .01M5 17l4-8h6l4 8M9 9l3 8 3-8M12 6h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>'],
+  ["check","Check",'<path d="M4 12.5l5 5L20 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'],
+  ["pressure","Presión",'<path d="M4 16a8 8 0 1 1 16 0M12 16l4-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>'],
+  ["costs","Gastos",'<path d="M5 20V10M12 20V4M19 20v-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'],
+  ["diag","Diagnóstico",'<path d="M14.5 5.5a4 4 0 0 0-5 5L4 16l4 4 5.5-5.5a4 4 0 0 0 5-5L16 12l-4-4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>']
+];
+let tab="garage";
+try{const t=localStorage.getItem(KEY+"-tab");if(t&&TABS.some(x=>x[0]===t))tab=t}catch(e){}
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=TABS.map(([k,l,i])=>`<button type="button" role="tab" data-tab="${k}" aria-selected="${k===tab}"><svg viewBox="0 0 24 24" aria-hidden="true">${i}</svg>${l}</button>`).join("");
+  TABS.forEach(([k])=>document.getElementById("v-"+k).hidden=k!==tab);
+}
+function renderAll(){
+  document.getElementById("exampleNote").hidden=!S.example;
+  renderTabs();renderGarage();renderCheck();renderPressure();renderCosts();renderDiag();
+}
+
+/* ---------- Eventos ---------- */
+document.addEventListener("click",e=>{
+  const t=e.target.closest("[data-tab]");
+  if(t){tab=t.dataset.tab;try{localStorage.setItem(KEY+"-tab",tab)}catch(_){}renderTabs();window.scrollTo(0,0);return}
+  const part=e.target.closest("#v-garage [data-id]");
+  if(part){openPart(part.dataset.id);return}
+  const c=e.target.closest("[data-chk]");
+  if(c){const id=c.dataset.chk;S.todayChecks.done[id]=!S.todayChecks.done[id];const was=allDone();save();renderCheck();if(was&&S.todayChecks.done[id])toast("Check completo. ¡A rodar!");return}
+  const s=e.target.closest("[data-sym]");
+  if(s){symptom=s.dataset.sym;renderDiag();return}
+});
+document.getElementById("hots").addEventListener("keydown",e=>{const g=e.target.closest(".hot");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openPart(g.dataset.id)}});
+document.getElementById("addRide").addEventListener("click",openRide);
+document.getElementById("resetBtn").addEventListener("click",()=>{S=sample();save();renderAll();toast("Ejemplo reiniciado")});
+document.getElementById("pWeight").addEventListener("input",e=>{S.pressure.w=+e.target.value;save();renderPressure()});
+[["pWidth","width",Number],["pSetup","setup",String],["pTerrain","terrain",String]].forEach(([id,k,f])=>{
+  document.getElementById(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.pressure[k]=f(b.dataset.v);save();renderPressure()});
+});
+
+renderAll();
+})();
+</script>
